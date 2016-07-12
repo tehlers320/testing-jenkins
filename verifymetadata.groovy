@@ -11,21 +11,11 @@
 import groovy.io.FileType
 import java.util.regex.*
 import hudson.model.*
-import hudson.EnvVars
 
-def workspace_dir = manager.build.getEnvVars()["WORKSPACE"];
+def build = Thread.currentThread().executable;
+def workspace_dir = build.workspace.toString();
+
 //def workspace_dir = '/home/tehlers/groovy/testing-jenkins/';
-
-/**
- * @return current jenkins job 
- */ 
-def jenkinsJob() {
-	def threadName = Thread.currentThread().getName()
-	def pattern = Pattern.compile("job/(.*)/build")
-	def matcher = pattern.matcher(threadName); matcher.find()
-	def jobName = matcher.group(1)
-	def jenkinsJob = Hudson.instance.getJob(jobName)
-}
 
 /**
  * @return repository tag list using default git on os path 
@@ -36,7 +26,7 @@ def tagList(dir) {
         def list = process.in.text.tokenize("\n")
 }
 
-System.out.println("Check for proper metadata.rb/metadata.json tags");
+println("Check for proper metadata.rb/metadata.json tags");
 
 
 def metadata_regex = ~/(^(version)\s+.(?!\.)(\d+(\.\d+)+)(?![\d\.]).)/
@@ -48,20 +38,22 @@ new File( workspace_dir + '/metadata.rb' ).eachLine { line ->
         }
 }
 
-System.out.println("Found the following versions in metadata: " + versions );
+println("Found the following versions in metadata: " + versions );
 
 try {
   println "Trying to find version";
   def tagList = tagList( workspace_dir )
   def version_regex = ~/${versions[0]}/
+  print "Found versions: " + tagList;
   tagList.each {
     def matcher_version = version_regex.matcher(it)
     boolean matchFound = matcher_version.find();
     //println it.name
     if (matchFound) {
       System.out.println("found version number: " + it);
-      System.exit(0);
+      //System.exit(0);
       }
+      
   }
 
 } catch ( e ) {
@@ -69,7 +61,8 @@ try {
 
 }
 
+println "\n";
+throw new hudson.AbortException("Cannot find valid version in your commit, please update metadata.rb and tag the repo\n")
+println "\n";
+   
 
-
-System.out.println("Cannot find valid version in your commit, please update metadata.rb and tag the repo");
-System.exit(1);
