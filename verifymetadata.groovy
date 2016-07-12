@@ -40,30 +40,17 @@ new File( workspace_dir + '/metadata.rb' ).eachLine { line ->
 
 println("Found the following versions in metadata: " + versions );
 
-try {
-  println "Trying to find version";
-  def tagList = tagList( workspace_dir )
-  def version_regex = ~/${versions[0]}/
-  def test = tagList.any { it =~ version_regex }
-  print "Found versions: " + tagList + "\n";
-  tagList.each {
-    def matcher_version = version_regex.matcher(it)
-    boolean matchFound = matcher_version.find();
-    if (matchFound) {
-      System.out.println("Found version number: " + it + " [OK]\n");
-      }
-      
-  }
 
-  if (!test) {
-    println "\n";
-    throw new hudson.AbortException("Cannot find valid version in your commit, please update metadata.rb and tag the repo\n")
-    println "\n";
-  }
-
-
-} catch ( e ) {
-  [ e.toString() ]
-
+def tagList = tagList( workspace_dir );
+def version_regex = ~/${versions[0]}/;
+println "Trying to find version";
+println "Found versions: " + tagList;
+def test = tagList.any { it =~ version_regex };
+  
+if (!test) {
+  println "\n";
+  throw new hudson.AbortException("Cannot find valid version in your commit, please update metadata.rb and tag the repo\n");
+  println "\n";
 }
+
 
