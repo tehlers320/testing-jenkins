@@ -11,6 +11,10 @@
 import groovy.io.FileType
 import java.util.regex.*
 import hudson.model.*
+import hudson.EnvVars
+
+def workspace_dir = manager.build.getEnvVars()["WORKSPACE"];
+//def workspace_dir = '/home/tehlers/groovy/testing-jenkins/';
 
 /**
  * @return current jenkins job 
@@ -37,7 +41,7 @@ System.out.println("Check for proper metadata.rb/metadata.json tags");
 
 def metadata_regex = ~/(^(version)\s+.(?!\.)(\d+(\.\d+)+)(?![\d\.]).)/
 def versions = []
-new File( jenkinsJob().workspace + '/metadata.rb').eachLine { line ->
+new File( workspace_dir + '/metadata.rb' ).eachLine { line ->
         def matcher_meta = metadata_regex.matcher(line)
         while (matcher_meta.find()) {
           versions << matcher_meta.group(3)
@@ -48,7 +52,7 @@ System.out.println("Found the following versions in metadata: " + versions );
 
 try {
   println "Trying to find version";
-  def tagList = tagList( jenkinsJob().workspace )
+  def tagList = tagList( workspace_dir )
   def version_regex = ~/${versions[0]}/
   tagList.each {
     def matcher_version = version_regex.matcher(it)
