@@ -4,10 +4,6 @@ import groovy.io.FileType
 import java.util.regex.*
 import hudson.model.*
 
-//Pattern version_pattern    = Pattern.compile("(?!\\.)(\\d+(\\.\\d+)+)(?![\\d\\.])");
-//Pattern metadataver_pattern   = Pattern.compile("(^(version)\\s+.(?!\\.)(\\d+(\\.\\d+)+)(?![\\d\\.]).)");
-
-//def list = []
 def tagList(dir) {
         def command = [ "/bin/bash", "-c", "cd '${dir}' ; git fetch --tags &> /dev/null ; git tag -l" ]
         def process = command.execute(); process.waitFor()
@@ -17,7 +13,7 @@ def tagList(dir) {
 
 def metadata_regex = ~/(^(version)\s+.(?!\.)(\d+(\.\d+)+)(?![\d\.]).)/
 def versions = []
-new File( jenkinsJob().workspace'/metadata.rb').eachLine { line ->
+new File( jenkinsJob().workspace + '/metadata.rb').eachLine { line ->
         def matcher_meta = metadata_regex.matcher(line)
         while (matcher_meta.find()) {
           versions << matcher_meta.group(3)
