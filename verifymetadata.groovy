@@ -1,14 +1,38 @@
-System.out.println("Check for proper metadata.rb/metadata.json tags");
+/*** BEGIN META {
+  "name" : "Chef metadata verify",
+  "comment" : "Verifies a chef cookbook has valid tagging in its metadata.rb",
+  "parameters" : [],
+  "core": "1.500",
+  "authors" : [
+    { name : "Timothy Ehlers" }
+  ]
+} END META**/
 
 import groovy.io.FileType
 import java.util.regex.*
 import hudson.model.*
 
+/**
+ * @return current jenkins job 
+ */ 
+def jenkinsJob() {
+	def threadName = Thread.currentThread().getName()
+	def pattern = Pattern.compile("job/(.*)/build")
+	def matcher = pattern.matcher(threadName); matcher.find()
+	def jobName = matcher.group(1)
+	def jenkinsJob = Hudson.instance.getJob(jobName)
+}
+
+/**
+ * @return repository tag list using default git on os path 
+ */ 
 def tagList(dir) {
         def command = [ "/bin/bash", "-c", "cd '${dir}' ; git fetch --tags &> /dev/null ; git tag -l" ]
         def process = command.execute(); process.waitFor()
         def list = process.in.text.tokenize("\n")
 }
+
+System.out.println("Check for proper metadata.rb/metadata.json tags");
 
 
 def metadata_regex = ~/(^(version)\s+.(?!\.)(\d+(\.\d+)+)(?![\d\.]).)/
